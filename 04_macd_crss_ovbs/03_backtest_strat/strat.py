@@ -80,7 +80,10 @@ class MacdCrossAndRSIOver(Strategy):
             signal_smoothing=cart_arrays[6].astype(np.int_),
             slow_length=cart_arrays[7].astype(np.int_),
         )
-
+        
+        # print(self.indicator_settings_arrays)
+        
+        
         if long_short == "long":
             self.set_entries_exits_array = self.long_set_entries_exits_array
             self.log_indicator_settings = self.long_log_indicator_settings
@@ -174,11 +177,23 @@ class MacdCrossAndRSIOver(Strategy):
             # low_price_below_ema = low_prices > self.ema
             macd_below_number = self.macd < self.macd_below
             
-            look_back = 10
+            look_back = 10            
             has_recent_oversold_rsi = np.zeros_like(self.closing_prices, dtype=bool)  # Initialize as False
             for i in range(look_back, len(rsi)):
                 window = rsi[i - look_back: i]
-                has_recent_oversold_rsi[i] = np.any(window < self.rsi_is_below)    
+                has_recent_oversold_rsi[i] = np.any(window < self.rsi_is_below)
+                
+            look_back_ema = 48
+            has_close_above_ema = np.zeros_like(self.closing_prices, dtype=bool)  # Initialize as False
+            # Ensure you have at least 48 candles of data 
+            if len(self.closing_prices) >= look_back_ema:                
+                for i in range(look_back_ema, len(self.closing_prices)):
+                    tmp = self.closing_prices[i - look_back_ema: i]
+                    ema_value = self.ema[i]
+                    has_close_above_ema[i] = np.any(tmp > ema_value) 
+            else:
+                # Handle the case where you don't have enough data yet 
+                print("Not enough candles for calculation")   
                 
             volume_above_ma = self.volume > self.ma_volume
             
@@ -202,6 +217,7 @@ class MacdCrossAndRSIOver(Strategy):
                 # & (macd_below_number == True)
                 & (has_recent_oversold_rsi == True)
                 & (volume_above_ma == True)
+                & (has_close_above_ema == True)
                 # & recent_macd_cross_up == False  # Skip entry if recent MACD cross up
             )            
             

@@ -1,0 +1,32 @@
+mufex_live_mode.py line 219 edit sleep from 1 to 1.5
+mufex_live_mode.py line 302 
+comment out raise Exception(f"Exception -> {e}")  
+add self.last_pnl = 0 #joe edit
+
+
+
+
+nohup python3 go_live.py & > /dev/null 2>&1 
+
+mufex.py line 764 modify function
+def check_if_order_filled(
+        self,
+        symbol: str,
+        order_id: str,
+):
+    retries = 2
+    while retries > 0:
+        data_list = self.get_filled_orders(symbol=symbol, order_id=order_id)
+        try:
+            if data_list[0]["orderId"] == order_id:
+                return True
+            else:
+                raise Exception  
+
+        except Exception as e:
+            retries -= 1
+            if retries > 0:
+                logger.warning(f"Retries {retries}")
+                time.sleep(1.0)  # Import time if not already imported
+            else:
+                raise Exception(f"Mufex check_if_order_filled -> {e}")

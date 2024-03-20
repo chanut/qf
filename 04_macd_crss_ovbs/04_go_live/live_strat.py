@@ -333,7 +333,24 @@ class MacdCrossAndRSIOver(Strategy):
                         
             look_back = 10
             has_recent_oversold_rsi = np.any(self.rsi[-look_back:] < self.rsi_is_below)
-                              
+            
+            look_back_ema = 48
+            # Ensure you have at least 48 candles of data 
+            if len(self.closing_prices) >= look_back_ema:                
+                has_close_above_ema = False  # Initialize
+
+                for i in range(look_back_ema, len(self.closing_prices)):
+                    tmp = self.closing_prices[i - look_back_ema: i]
+                    ema_value = self.ema[i]
+                    if np.any(tmp > ema_value):
+                        has_close_above_ema = True 
+                        break  # Exit the loop early if the condition is met
+
+            else:
+                    # Handle the case where you don't have enough data yet 
+                    has_close_above_ema = False
+                    print("Not enough candles for calculation")
+                                              
             volume_above_ma = self.volume[-1] > self.ma_volume[-1]
             
             logger.info(f"Created RSI rsi_length= {self.rsi_length}")
@@ -341,13 +358,15 @@ class MacdCrossAndRSIOver(Strategy):
             logger.info(f"macd_above_signal= {self.macd[-1]} > {self.signal[-1]} {macd_above_signal}")
             logger.info(f"volume_above_ma= {self.volume[-1]} > {self.ma_volume[-1]} {volume_above_ma}")
             # logger.info(f"macd_below_number= {self.macd[-1]} < {self.macd_below} {macd_below_number}")
-            logger.info(f"has_recent_oversold_rsi= look_back {look_back} {macd_below_number}")
+            logger.info(f"has_recent_oversold_rsi= look_back {look_back} {has_recent_oversold_rsi}")
+            logger.info(f"has_close_above_ema= look_back_ema {look_back_ema} {has_close_above_ema}")
             
             if (
                 macd_above_signal == True
                 & macd_below_signal == True
                 # & macd_below_number == True
                 & has_recent_oversold_rsi == True
+                & has_close_above_ema == True
                 # & volume_above_ma == True
                 ):
                 logger.info("\n\n")

@@ -25,7 +25,7 @@ from quantfreedom.enums import (
 
 logger = getLogger("info")
 
-ind_set_index = 65
+ind_set_index = 29
 dos_index = 0
 
 email_sender = EmailSender(
@@ -50,17 +50,32 @@ logger.debug("set email sender")
 # )
 
 # qf_score 0.837 idn = 65, doc_index = 0
+# strategy = MacdCrossAndRSIOver(
+#     long_short="long",
+#     rsi_length=np.array([14]),
+#     rsi_is_below=np.arange(20, 46, 5),
+#     ema_length=np.arange(200, 401, 200),
+#     fast_length=np.arange(10, 21, 10),
+#     macd_below=np.array([0]),    
+#     signal_smoothing=np.arange(5, 16, 10),
+#     slow_length=np.arange(30, 61, 30),  
+#     email_sender=email_sender
+# )
+
+# qf_score 65.116 rsi_below=35 gain=96.703	 idn = 29, doc_index = 0
 strategy = MacdCrossAndRSIOver(
     long_short="long",
     rsi_length=np.array([14]),
     rsi_is_below=np.arange(20, 46, 5),
-    ema_length=np.arange(200, 401, 200),
+    ema_length=np.arange(200, 201, 200),
     fast_length=np.arange(10, 21, 10),
     macd_below=np.array([0]),    
     signal_smoothing=np.arange(5, 16, 10),
-    slow_length=np.arange(30, 61, 30),  
+    slow_length=np.arange(30, 61, 30),
     email_sender=email_sender
 )
+
+
 
 
 
@@ -149,10 +164,28 @@ logger.debug("set static order settings")
 # )
 
 #test live
+# qf_score 0.837 idn = 65, doc_index = 0
+# dos_arrays = DynamicOrderSettingsArrays(
+#     max_equity_risk_pct=np.array([12]),
+#     max_trades=np.array([3]),
+#     risk_account_pct_size=np.array([3]),
+#     risk_reward=np.array([2]),
+#     sl_based_on_add_pct=np.array([1]),
+#     sl_based_on_lookback=np.array([30]),
+#     sl_bcb_type=np.array([CandleBodyType.Low]),
+#     sl_to_be_cb_type=np.array([CandleBodyType.Nothing]),
+#     sl_to_be_when_pct=np.array([0]),
+#     trail_sl_bcb_type=np.array([CandleBodyType.Low]),
+#     trail_sl_by_pct=np.array([1]),
+#     trail_sl_when_pct=np.array([1]),
+# )
+
+# live
+# qf_score 65.116 rsi_below=35 gain=63.595	 idn = 29, doc_index = 0
 dos_arrays = DynamicOrderSettingsArrays(
     max_equity_risk_pct=np.array([12]),
     max_trades=np.array([3]),
-    risk_account_pct_size=np.array([3]),
+    risk_account_pct_size=np.array([4]),
     risk_reward=np.array([2]),
     sl_based_on_add_pct=np.array([1]),
     sl_based_on_lookback=np.array([30]),
@@ -206,7 +239,7 @@ while True:
             tp_order_type="limit",
         ).run(
             candles_to_dl=1000,
-            timeframe="1m",
+            timeframe="5m",
         )
         break  # If no errors, exit the loop
     except Exception as e:
